@@ -1,0 +1,11 @@
+triển khai local: 
+
+Thời gian  dau lam quen truoc
+
+
+
+tom tat lai cac thong tin hoc tap thanh cac tai lieu rieng. Nhung ca nhan nen tao ra cac bai toan => huong dan ho tro code bang AI.
+
+
+
+Các bước: Phân tích, tham khảo trên mạng, lên kế hoạch , code.
