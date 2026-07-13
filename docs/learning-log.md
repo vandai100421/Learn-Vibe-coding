@@ -107,7 +107,32 @@
 
 ## Tuần 3 — P2: Pipeline RAG offline
 
-(điền khi học Tuần 3)
+### [Tuần 3] Concept: RAG (Retrieval-Augmented Generation)
+
+- **Ngày:** 2026-07-14
+- **Mức hiểu:** 3
+- **Giải thích bằng lời mình:** RAG tìm tài liệu liên quan → đưa context + câu hỏi cho LLM → trả lời dựa trên context. Khác fine-tuning: RAG thêm tài liệu = upload file, không cần train lại. Phù hợp khi tài liệu thay đổi thường xuyên (như SOP, config homelab).
+- **Ví dụ cụ thể đã làm:** Open WebUI có RAG engine built-in — upload tài liệu → tự chunk + embed + lưu vector DB → query tự search context. Sẽ test Q&A với tài liệu P1 ở phiên sau.
+- **Câu hỏi còn lại:** Chunk size ảnh hưởng chất lượng RAG thế nào? (sẽ học Tuần 4)
+- **Tài liệu tham khảo:** `ARCHITECTURE.md` mục P2, `opsbrain/docker-compose.yml`.
+
+### [Tuần 3] Concept: Embedding + Vector DB
+
+- **Ngày:** 2026-07-14
+- **Mức hiểu:** 3
+- **Giải thích bằng lời mình:** Embedding chuyển văn bản thành vector (dãy số). Văn bản giống nhau → vector gần nhau. Vector DB lưu vector, query tìm top-k vector gần nhất = tài liệu liên quan nhất. bge-m3 là embedding model tốt tiếng Việt + đa ngôn ngữ. ChromaDB là vector DB built-in trong Open WebUI.
+- **Ví dụ cụ thể đã làm:** Pull `bge-m3` qua Ollama (1.2GB). Open WebUI config `OLLAMA_EMBEDDINGS_MODEL=bge-m3`.
+- **Câu hỏi còn lại:** ChromaDB vs Qdrant vs PGVector khác nhau thế nào? (sẽ học Tuần 4)
+- **Tài liệu tham khảo:** `opsbrain/docker-compose.yml`.
+
+### [Tuần 3] Concept: Ollama native + host.docker.internal
+
+- **Ngày:** 2026-07-14
+- **Mức hiểu:** 4
+- **Giải thích bằng lời mình:** Ollama chạy native Windows (không Docker) để tận dụng CPU trực tiếp, không qua lớp ảo hóa. Container Open WebUI gọi Ollama bằng `host.docker.internal:11434` — `host.docker.internal` resolve thành IP host Windows, không phải localhost của container (localhost trong container = container itself). Cần `extra_hosts: host.docker.internal:host-gateway` trong compose để resolve.
+- **Ví dụ cụ thể đã làm:** Open WebUI kết nối Ollama thành công, model `qwen2.5:3b` xuất hiện trong dropdown, chat hoạt động.
+- **Câu hỏi còn lại:** Khi vào môi trường offline (air-gap), Ollama + Open WebUI cần pre-stage gì?
+- **Tài liệu tham khảo:** `opsbrain/docker-compose.yml`, TROUBLE-002 mẫu.
 
 ---
 

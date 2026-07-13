@@ -117,6 +117,34 @@
 
 ## Tuần 3 — P2: Pipeline RAG offline
 
+### 2026-07-14 — Cài Ollama + Open WebUI + test chat cơ bản
+
+- **Thời gian:** 01:15-01:45 (khoảng 30 phút)
+- **Mục tiêu phiên:** Cài Ollama, pull model, cài Open WebUI, test chat cơ bản.
+- **Đã làm:**
+  - Tắt P1 stack (`docker compose stop`) để giải phóng RAM cho P2.
+  - Cài Ollama v0.31.2 native Windows (port 11434).
+  - Pull `qwen2.5:3b` (1.9GB) + `bge-m3` (1.2GB).
+  - Test Qwen2.5:3B trên CPU: trả lời tiếng Việt OK, ~12s/câu ngắn.
+  - Tạo cấu trúc `opsbrain/` + `docker-compose.yml` (Open WebUI + ChromaDB built-in).
+  - Cài Open WebUI (Docker), kết nối tới Ollama qua `host.docker.internal:11434`.
+  - Tạo admin account, test chat cơ bản (chưa RAG) — AI trả lời tiếng Việt.
+  - Viết báo cáo kết quả thực hiện dự án (`docs/bao-cao-ket-qua.md`).
+- **Chưa làm:** Upload tài liệu P1 vào Open WebUI, test Q&A RAG, ghi log học tập Tuần 3.
+- **Khó khăn:**
+  - Ollama chưa có trong PATH sau cài → set PATH thủ công (cài vào `AppData\Local\Programs\Ollama`).
+  - Open WebUI khởi động chậm lần đầu (~3 phút) — tải model embedding phụ trợ từ HuggingFace. Container "unhealthy" tạm thời, tự healthy sau.
+- **Kế hoạch phiên sau:**
+  1. Copy tài liệu P1 (SOP, config, log mẫu) vào `opsbrain/knowledge/`.
+  2. Upload tài liệu vào Open WebUI qua UI (Workspace → Documents).
+  3. Test Q&A RAG: "Cách restore backup?", "Service nào đang chạy?".
+  4. Ghi 3-5 concept Tuần 3 vào `learning-log.md`.
+  5. Commit cột mốc Tuần 3.
+
+---
+
+## Tuần 3 — P2: Pipeline RAG offline
+
 (điền khi đến Tuần 3)
 
 ---
