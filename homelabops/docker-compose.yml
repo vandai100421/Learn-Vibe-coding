@@ -1,0 +1,60 @@
+# HomelabOps — docker-compose.yml
+# Tuần 1: Nginx Proxy Manager + Homepage
+# Mục đích: học Docker network + reverse proxy
+# Truy cập service qua domain ảo (app1.local) thay vì localhost:port
+
+services:
+  # ─────────────────────────────────────────────
+  # Nginx Proxy Manager — reverse proxy
+  # Nhận request theo domain (app1.local) → forward đến service đúng
+  # Port 80/443: traffic web; 81: admin panel (cấu hình proxy qua UI)
+  # ─────────────────────────────────────────────
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:2.11.3
+    container_name: npm
+    restart: unless-stopped
+    ports:
+      - "80:80"     # HTTP — vào qua domain ảo (app1.local)
+      - "443:443"   # HTTPS — để sau (SSL chưa dùng Tuần 1)
+      - "81:81"     # Admin panel — http://localhost:81 để cấu hình proxy host
+    volumes:
+      # Named volume: dữ liệu quan trọng (proxy config, user) — không sửa trực tiếp
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt  # Cert SSL (dùng sau)
+    networks:
+      - proxy
+    environment:
+      - TZ=${TZ:-Asia/Ho_Chi_Minh}
+
+  # ─────────────────────────────────────────────
+  # Homepage — dashboard trung tâm
+  # Hiển thị link các service, widget RAM/CPU
+  # Không expose port ra host (intentional) — chỉ truy cập qua NPM (app1.local)
+  # Vì sao bind mount: cần sửa file config YAML trực tiếp (CODING_STANDARDS cho phép)
+  # ─────────────────────────────────────────────
+  homepage:
+    image: ghcr.io/gethomepage/homepage:v0.9.10
+    container_name: homepage
+    restart: unless-stopped
+    volumes:
+      - ./homepage/config:/app/config  # Bind mount: sửa dashboard trực tiếp
+    networks:
+      - proxy
+    environment:
+      - TZ=${TZ:-Asia/Ho_Chi_Minh}
+    # Không có `ports:` — NPM sẽ forward app1.local → homepage:3000
+
+# ─────────────────────────────────────────────
+# Network: container cùng network mới gọi nhau được (theo tên service)
+# NPM forward "app1.local" → "homepage:3000" vì cùng network "proxy"
+# ─────────────────────────────────────────────
+networks:
+  proxy:
+    name: homelabops_proxy
+
+# ─────────────────────────────────────────────
+# Named volumes: dữ liệu tồn tại qua restart, không mất khi down
+# ─────────────────────────────────────────────
+volumes:
+  npm_data:
+  npm_letsencrypt:

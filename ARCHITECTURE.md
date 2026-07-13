@@ -9,7 +9,7 @@ Hai project bổ trợ nhau: P1 tạo hạ tầng + dữ liệu, P2 tiêu thụ 
 ```
 Project 1 (HomelabOps)            Project 2 (OpsBrain)
 ┌─────────────────────┐           ┌─────────────────────┐
-│  Docker Engine       │           │  Open WebUI (FE +   │
+│  Docker Desktop      │           │  Open WebUI (FE +   │
 │  ├─ Nginx Proxy      │           │   RAG engine)       │
 │  ├─ Homepage         │           │  ├─ Chat UI         │
 │  ├─ Prometheus       │  SOP,     │  ├─ Upload tài liệu │
@@ -18,7 +18,7 @@ Project 1 (HomelabOps)            Project 2 (OpsBrain)
 │  ├─ Loki + Promtail  │  upload   │  └─ Reranking       │
 │  ├─ Uptime Kuma (opt)│           │                     │
 │  ├─ Backup (cron)    │           │  Ollama (LLM)       │
-│  └─ Ansible playbook │           │  └─ Qwen2.5:32B     │
+│  └─ Ansible playbook │           │  └─ Qwen2.5:3B      │
 └─────────────────────┘           │                     │
                                   │  Vector DB (chọn 1) │
                                   │  ├─ ChromaDB (mặc định)
@@ -105,7 +105,7 @@ Người dùng
 Open WebUI (Frontend + RAG engine built-in)
    │
    ▼
-Ollama (LLM: Qwen2.5:32B)
+Ollama (LLM: Qwen2.5:3B)
    │
    │  cần context
    ▼
@@ -137,7 +137,7 @@ Open WebUI upload UI
 
 ```
 Câu hỏi → embed (bge-m3) → hybrid search (BM25+vector, top-k)
-       → reranking → context + câu hỏi → Ollama (Qwen2.5:32B)
+       → reranking → context + câu hỏi → Ollama (Qwen2.5:3B)
        → trả lời + trích nguồn → Open WebUI
 ```
 
@@ -157,7 +157,7 @@ opsbrain/
 ├─ docker-compose.yml
 ├─ .env
 ├─ ollama/
-│   └─ models/ (Qwen2.5:32B, bge-m3)
+│   └─ models/ (Qwen2.5:3B, bge-m3)
 ├─ open-webui/
 │   └─ data/ (vector DB + tài liệu đã upload)
 ├─ /knowledge/ (tài liệu gốc để upload vào Open WebUI)

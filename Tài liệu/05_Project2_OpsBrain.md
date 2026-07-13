@@ -6,6 +6,8 @@ OpsBrain là trợ lý AI hoạt động hoàn toàn offline, hỗ trợ ngườ
 
 Hệ thống kế thừa dữ liệu từ Project 1 (SOP, runbook, config, log mẫu) làm nguồn tri thức, tận dụng RAG pipeline built-in của Open WebUI thay vì tự code từ đầu, tập trung thời gian vào việc học concept và tinh chỉnh chất lượng.
 
+**Scope được tinh chỉnh cho 4 tuần, phân tầng ưu tiên.**
+
 ---
 
 # 1. Bối cảnh
@@ -61,9 +63,11 @@ Có thể mở rộng:
 
 ---
 
-# 5. MVP
+# 5. MVP (phân tầng ưu tiên)
 
-## Input
+## Tier 1 — Bắt buộc (Tuần 3)
+
+### Input
 
 Tài liệu tri thức (từ Project 1), upload trực tiếp qua Open WebUI:
 
@@ -76,46 +80,57 @@ Câu hỏi người dùng:
 
 - Tiếng Việt, ngôn ngữ tự nhiên
 
-## Processing (tận dụng built-in RAG)
+### Processing (tận dụng built-in RAG)
 
 - Upload tài liệu qua UI Open WebUI (không cần tự code ingest script)
 - Open WebUI tự động: đọc → chunk → embed (bge-m3) → lưu vector DB
 - Query: phân tích câu hỏi → embed → hybrid search (BM25 + vector) → top-k context + reranking
 - Sinh: gửi context + câu hỏi tới local LLM → trả lời + trích nguồn
-- (Tùy chọn) Log analysis: paste log → AI giải thích + đề xuất xử lý
 
-## Output
+### Output
 
 - Câu trả lời tiếng Việt
 - Danh sách tài liệu tham khảo
 - Trích dẫn nguồn
-- (Tùy chọn) Phân tích log
+
+## Tier 2 — Nên có (Tuần 4)
+
+- So sánh hiệu năng giữa 2 vector DB: ChromaDB vs Qdrant
+- Bật hybrid search (BM25 + vector) + reranking trong Open WebUI
+- Thử Qwen2.5:7B nếu RAM dư (cân nhắc trade-off tốc độ/chất lượng), mặc định dùng 3B
+
+## Tier 3 — Tùy chọn (chỉ làm nếu Tier 1+2 xong sớm)
+
+- Đóng gói offline: model + image + cache sẵn sàng mang vào môi trường nội bộ
+- Log analysis chuyên sâu (paste log → AI giải thích + đề xuất xử lý)
+- Thử PGVector nếu đã có PostgreSQL sẵn (chỉ khi muốn so sánh thêm)
 
 ---
 
 # 6. Công nghệ dự kiến
 
-Local LLM
+### Local LLM
 
 - Ollama
-- Qwen2.5:32B (model chính)
-- Qwen2.5:14B (dự phòng)
+- Qwen2.5:3B (model chính — phù hợp 8GB RAM, chạy được trên CPU)
+- Qwen2.5:7B (thử nếu RAM dư, chất lượng tốt hơn nhưng chậm hơn)
+- Trade-off: 3B đủ học concept RAG, chất lượng tiếng Việt trung bình-khá; 7B tốt hơn nhưng chật RAM
 
-Embedding
+### Embedding
 
 - bge-m3
 
-Vector Database (học so sánh, chọn 1)
+### Vector Database (chỉ so sánh 2)
 
 - ChromaDB (mặc định của Open WebUI)
 - Qdrant (thử so sánh hiệu năng)
-- PGVector (thử nếu đã có PostgreSQL)
+- PGVector (chỉ nếu còn thời gian và đã có PostgreSQL)
 
-Frontend + RAG engine
+### Frontend + RAG engine
 
 - Open WebUI (built-in RAG: hybrid search + reranking)
 
-Tương tác AI khi code
+### Tương tác AI khi code
 
 - OpenCode + GLM 5.2 (trong thời gian khóa học)
 
@@ -123,39 +138,48 @@ Tương tác AI khi code
 
 # 7. Tiêu chí hoàn thành
 
+**Bắt buộc (Tier 1):**
+
 - Chat được với AI bằng tiếng Việt.
 - Trả lời dựa trên tài liệu nội bộ đã upload.
-- Hiểu và bật được hybrid search (BM25 + vector) + reranking trong Open WebUI.
-- Đã thử so sánh ít nhất 2 vector DB (ChromaDB vs Qdrant/PGVector).
 - Hiển thị nguồn tài liệu tham khảo.
 - Hoạt động offline hoàn toàn (sau khi pre-stage tài nguyên).
-- Đã đóng gói offline: model + image + cache sẵn sàng mang vào môi trường nội bộ.
+
+**Nên có (Tier 2):**
+
+- Hiểu và bật được hybrid search (BM25 + vector) + reranking trong Open WebUI.
+- Đã thử so sánh 2 vector DB (ChromaDB vs Qdrant).
 - Hiểu concept RAG pipeline end-to-end (không chỉ chạy được).
+
+**Tùy chọn (Tier 3):**
+
+- Đã đóng gói offline: model + image + cache sẵn sàng mang vào môi trường nội bộ.
+- Phân tích log chuyên sâu.
 
 ---
 
 # 8. Hướng phát triển
 
-Version 1 (trong khóa)
+**Version 1 (trong khóa)**
 
 - AI Search / Q&A trên tài liệu ops (built-in RAG)
 
-Version 2
+**Version 2**
 
 - Log analysis chuyên sâu
 
-Version 3
+**Version 3**
 
 - Tích hợp với Project 1: hỏi trạng thái hạ tầng realtime
 
-Version 4
+**Version 4**
 
 - Agent: tự thực thi lệnh vận hành
 
-Version 5
+**Version 5**
 
 - Multi-source: code, tài liệu học tập, quy trình
 
-Version 6
+**Version 6**
 
 - Enterprise AI Assistant nội bộ

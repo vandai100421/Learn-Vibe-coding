@@ -1,0 +1,30 @@
+# Homepage — services.yaml
+# Danh sách service hiển thị trên dashboard
+# Mỗi service có link + icon + mô tả ping (kiểm tra sống)
+
+- HomelabOps:
+    # NPM admin — quản lý reverse proxy
+    - NPM Admin:
+        href: http://npm.local:81
+        icon: nginx-proxy-manager
+        description: Quản lý reverse proxy, thêm domain ảo
+        ping: http://npm.local:81
+
+    # Homepage (tự tham chiếu)
+    - Homepage:
+        href: http://app1.local
+        icon: homepage
+        description: Dashboard trung tâm
+        ping: http://app1.local
+
+    # Placeholder cho service Tuần 2 (chưa chạy, hiện sẽ "down")
+    - Grafana:
+        href: http://grafana.local
+        icon: grafana
+        description: Dashboard monitoring (Tuần 2)
+        # Không ping vì chưa chạy
+
+    - Prometheus:
+        href: http://prometheus.local
+        icon: prometheus
+        description: Thu thập metrics (Tuần 2)

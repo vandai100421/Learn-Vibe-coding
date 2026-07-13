@@ -1,0 +1,22 @@
+# Homepage — settings.yaml
+# Cấu hình chung cho dashboard
+
+# Tiêu đề hiển thị trên tab trình duyệt + header
+title: HomelabOps Dashboard
+
+# Giao diện
+theme: dark
+color: slate
+
+# Bố cục: hiển thị theo group
+layout:
+  HomelabOps:
+    style: row
+    columns: 3
+
+# Cho phép widget hệ thống (CPU/RAM/disk) đọc từ host
+# Cần bind mount /proc hoặc dùng Docker socket (để sau)
+quicklaunch:
+  searchDescriptions: true
+  hideInternetSearch: true
+  showSearchSuggestions: true

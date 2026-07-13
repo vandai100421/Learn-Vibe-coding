@@ -16,8 +16,9 @@ Mục tiêu phụ: hoàn thành 2 project thực hành.
 
 ## Môi trường
 
-- Máy cá nhân: 32GB RAM, có GPU
-- OS: Windows + WSL2 (Ubuntu) cho P1, native Windows cho Ollama P2
+- Máy cá nhân: 8GB RAM, không có GPU
+- OS: Windows 10, dùng Docker Desktop cho P1, Ollama native cho P2
+- Lưu ý tài nguyên: 8GB RAM giới hạn số service chạy đồng thời ở P1 và buộc chọn LLM nhỏ (Qwen2.5:3B) ở P2
 - Thời gian: 4 tuần
 - Hết khóa: không còn GLM 5.2, vào môi trường air-gapped
 

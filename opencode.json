@@ -17,8 +17,8 @@
   },
   "model": "custom/glm-5.2",
   "permission": {
-    "bash": "ask",
-    "edit": "ask"
+    "bash": "allow",
+    "edit": "allow"
   },
   "instructions": [
     "PROJECT.md",

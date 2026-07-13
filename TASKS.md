@@ -15,7 +15,7 @@
 
 ### Mục tiêu học
 
-- Docker Engine vs Docker Desktop: vì sao dùng Engine trong WSL2.
+- Docker Desktop trên Windows: vì sao chọn (8GB RAM, dễ cấu hình, giới hạn resource được).
 - Docker Compose: orchestration nhiều service.
 - Docker network: bridge, internal, expose port.
 - Reverse proxy: vì sao cần, định tuyến theo domain.
@@ -23,7 +23,7 @@
 
 ### Việc cần làm
 
-- [ ] Cài WSL2 + Ubuntu + Docker Engine (không dùng Docker Desktop).
+- [ ] Cài Docker Desktop trên Windows 10, giới hạn RAM trong Settings → Resources (~3-4GB).
 - [ ] Tạo cấu trúc thư mục `/homelabops/`.
 - [ ] Viết `docker-compose.yml`: Nginx Proxy Manager + Homepage.
 - [ ] Cấu hình reverse proxy: truy cập `app1.local` thay vì port.
@@ -78,7 +78,7 @@
 ### Mục tiêu học
 
 - Local LLM: Ollama architecture, vì sao chạy được offline.
-- Model selection: vì sao chọn Qwen2.5:32B, trade-off RAM/speed/quality.
+- Model selection: vì sao chọn Qwen2.5:3B với 8GB RAM, trade-off RAM/speed/quality.
 - Embedding: vector là gì, vì sao cần embed, bge-m3 vì sao tốt tiếng Việt.
 - Vector DB: ChromaDB vs Qdrant vs FAISS, vì sao chọn ChromaDB.
 - RAG pipeline: ingest → chunk → embed → store → retrieve → generate.
@@ -86,8 +86,8 @@
 
 ### Việc cần làm
 
-- [ ] Cài Ollama, pull `qwen2.5:32b` + `bge-m3`.
-- [ ] Test chạy model trên GPU, đo tốc độ.
+- [ ] Cài Ollama, pull `qwen2.5:3b` + `bge-m3`.
+- [ ] Test chạy model trên CPU, đo tốc độ.
 - [ ] Cài ChromaDB (Docker) + Open WebUI (Docker).
 - [ ] Kết nối Open WebUI với Ollama.
 - [ ] Upload tài liệu P1 (SOP, config, log mẫu) qua Open WebUI UI.
