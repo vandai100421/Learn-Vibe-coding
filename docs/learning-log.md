@@ -67,7 +67,41 @@
 
 ## Tuần 2 — P1: Giám sát, log, backup
 
-(điền khi học Tuần 2)
+### [Tuần 2] Concept: Prometheus pull model + exporter
+
+- **Ngày:** 2026-07-14
+- **Mức hiểu:** 3
+- **Giải thích bằng lời mình:** Prometheus dùng pull model — nó chủ động gọi đến exporter mỗi 15s để lấy metrics, không nhận push. Exporter là chương trình expose metrics ra endpoint `/metrics`. Node Exporter expose metrics hệ thống (CPU, RAM, disk). Hệ quả: Prometheus và exporter phải cùng Docker network mới scrape được.
+- **Ví dụ cụ thể đã làm:** Prometheus ở network `proxy` + `monitoring`, Node Exporter chỉ ở `monitoring`. Prometheus scrape `node-exporter:9100` (Docker DNS resolve). Cả 2 target `up` trong `/api/v1/targets`.
+- **Câu hỏi còn lại:** Khi nào dùng push model (Pushgateway) thay pull?
+- **Tài liệu tham khảo:** `homelabops/docker-compose.yml`, `homelabops/prometheus/prometheus.yml`.
+
+### [Tuần 2] Concept: Metrics vs Logs (khi nào dùng cái nào)
+
+- **Ngày:** 2026-07-14
+- **Mức hiểu:** 4
+- **Giải thích bằng lời mình:** Metrics = số đo theo thời gian (CPU 80%, RAM 4GB), nhỏ có cấu trúc, trả lời "hệ thống có khỏe không?". Logs = sự kiện (error, request), lớn text, trả lời "chuyện gì đã xảy ra? tại sao lỗi?". Cần cả hai: metrics báo có vấn đề, logs cho biết vấn đề là gì. Prometheus cho metrics, Loki cho logs, cả hai query trong Grafana UI.
+- **Ví dụ cụ thể đã làm:** Grafana có 2 datasource: Prometheus (metrics) + Loki (logs). Dashboard Node Exporter Full query Prometheus. Explore Loki với `{container_name="npm"}` xem log NPM.
+- **Câu hỏi còn lại:** Alerting nên dựa trên metrics hay logs?
+- **Tài liệu tham khảo:** `homelabops/docker-compose.yml` (services: prometheus, loki, grafana).
+
+### [Tuần 2] Concept: Loki vs ELK (vì sao chọn Loki với 8GB RAM)
+
+- **Ngày:** 2026-07-14
+- **Mức hiểu:** 3
+- **Giải thích bằng lời mình:** ELK (Elasticsearch) index toàn bộ nội dung log → mạnh full-text search nhưng nặng RAM (JVM heap 2-4GB+). Loki chỉ index label (metadata), log để thô → nhẹ (~200MB), query bằng LogQL (giống PromQL). Với 8GB RAM, ELK không khả thi, Loki đủ nhẹ và tích hợp sẵn trong Grafana UI (không cần thêm service).
+- **Ví dụ cụ thể đã làm:** Loki + Promtail chạy cùng stack, Promtail push log 7 container lên Loki. Query `{container_name="npm"}` trả log NPM trong Grafana Explore.
+- **Câu hỏi còn lại:** Loki query chậm hơn Elasticsearch bao nhiêu? Khi nào Loki không đủ?
+- **Tài liệu tham khảo:** `homelabops/loki/loki-config.yml`, `homelabops/promtail/promtail-config.yml`.
+
+### [Tuần 2] Concept: Bash `set -euo pipefail` + backup volume Docker
+
+- **Ngày:** 2026-07-14
+- **Mức hiểu:** 3
+- **Giải thích bằng lời mình:** `set -e` thoát khi lệnh lỗi, `set -u` lỗi khi dùng biến chưa định nghĩa, `set -o pipefail` lỗi nếu pipe có lệnh lỗi. Backup volume Docker không copy trực tiếp được (Docker quản lý vị trí) → dùng `docker run --rm -v volume:/data -v backup_dir:/backup alpine tar czf` tạo container tạm nén ra tar.gz.
+- **Ví dụ cụ thể đã làm:** `backup.sh` backup 5 volume (npm_data, prometheus_data, grafana_data, loki_data, npm_letsencrypt) → tar.gz, 5/5 thành công (~445KB). Retention 7 ngày, chạy qua Windows Task Scheduler daily 2AM.
+- **Câu hỏi còn lại:** Restore test thế nào để chắc backup không hỏng?
+- **Tài liệu tham khảo:** `homelabops/backup/backup.sh`.
 
 ---
 

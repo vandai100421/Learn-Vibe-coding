@@ -64,7 +64,25 @@
 
 ## Tuần 2 — P1: Giám sát, log, backup
 
-(điền khi đến Tuần 2)
+### 2026-07-14 — Prometheus + Node Exporter + Grafana + Loki + Promtail + backup
+
+- **Thời gian:** 00:00-01:15 (khoảng 1h15)
+- **Mục tiêu phiên:** Thêm monitoring (Prometheus + Grafana), logging (Loki + Promtail), backup script.
+- **Đã làm:**
+  - Thêm Prometheus + Node Exporter vào compose, tạo 2 network (`proxy` + `monitoring`).
+  - Cấu hình `prometheus.yml` (2 job: prometheus self + node-exporter). Scrape thành công, cả 2 target `up`.
+  - Thêm Grafana, tạo datasource Prometheus (`http://prometheus:9090`), import dashboard Node Exporter Full (ID 1860).
+  - Tạo Proxy Host trong NPM cho `prometheus.local` và `grafana.local`.
+  - Thêm Loki + Promtail vào compose. Promtail thu thập log 7 container, push lên Loki thành công.
+  - Tạo datasource Loki trong Grafana (`http://loki:3100`), test query `{container_name="npm"}` OK.
+  - Viết `backup.sh`: backup 5 volume → tar.gz, có `set -euo pipefail`, log, retention 7 ngày. Test 5/5 thành công (~445KB).
+  - Tạo Windows Task Scheduler "HomelabOps Backup" chạy daily 2:00 AM.
+- **Chưa làm:** Ansible playbook, 2-3 SOP.
+- **Khó khăn:**
+  - Loki config lỗi `max_chunk_size not found` → field không hợp lệ trong v2.9.7 → xóa field đó.
+  - Git Bash MSYS path conversion: `/backup` → `C:/Program Files/Git/backup` → fix `MSYS_NO_PATHCONV=1`.
+  - Promtail ban đầu không resolve `loki` (Loki chưa start xong) → tự retry, thành công.
+- **Kế hoạch phiên sau:** Viết Ansible playbook deploy service, viết 2-3 SOP (restart, restore, thêm service).
 
 ---
 

@@ -1,0 +1,34 @@
+# Loki — cấu hình lưu trữ log tập trung
+# Mục đích: nhận log từ Promtail, lưu trữ, query bằng LogQL
+# Loki KHÔNG index nội dung log — chỉ index label (metadata) → nhẹ RAM/disk
+
+auth_enabled: false  # Homelab nội bộ, không cần auth giữa Loki-Promtail
+
+server:
+  http_listen_port: 3100
+
+common:
+  path_prefix: /loki  # Nơi lưu data (mapped ra volume)
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks    # Log thô (nén)
+      rules_directory: /loki/rules
+  replication_factor: 1  # 1 bản sao (homelab, không cần HA)
+  ring:
+    kvstore:
+      store: inmemory
+
+# Giới hạn để bảo vệ RAM 8GB
+limits_config:
+  # Giữ log 7 ngày (604800s) — đủ để troubleshoot, không phình disk
+  retention_period: 604800s
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h  # Index theo ngày — tradeoff: query chậm hơn nhưng tiết kiệm disk

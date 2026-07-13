@@ -1,0 +1,31 @@
+# Promtail — cấu hình thu thập log container Docker
+# Mục đích: đọc log từ Docker, gắn label, push lên Loki
+# Promtail là "push model" — chủ động gửi log đến Loki (khác Prometheus pull)
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  # Lưu vị trí đã đọc đến đâu trong file log — để restart không đọc lại từ đầu
+  filename: /tmp/positions.yaml
+
+clients:
+  # Địa chỉ Loki — dùng tên service (Docker DNS, cùng network monitoring)
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Thu thập log container Docker
+  # Docker ghi stdout/stderr ra file JSON tại /var/lib/docker/containers/*/<id>.log
+  - job_name: docker
+    docker_sd_configs:
+      # Tự động phát hiện container qua Docker socket
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      # Gắn label từ metadata container vào log — dùng để query/filter trong Loki
+      - source_labels: ['__meta_docker_container_name']
+        target_label: 'container_name'
+        regex: '/(.*)'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'

@@ -51,12 +51,28 @@
 
 ---
 
-### TROUBLE-003:
+### TROUBLE-003: Loki crash do config field `max_chunk_size` không hợp lệ
 
-- **Ngày:**
-- **Service:**
-- **Triệu chứng:**
-- **Nguyên nhân gốc:**
-- **Cách khắc phục:**
-- **Bài học:**
-- **Trạng thái:**
+- **Ngày:** 2026-07-14
+- **Service:** loki
+- **Triệu chứng:** Container Loki restart liên tục, log: `failed parsing config: field max_chunk_size not found in type validation.plain`.
+- **Nguyên nhân gốc:** Field `max_chunk_size` trong `limits_config` đã bị deprecated/đổi tên trong Loki 2.9.7. Mình copy từ tài liệu cũ版本的Loki.
+- **Cách khắc phục:** Xóa field `max_chunk_size` khỏi `loki-config.yml`, giữ `retention_period` (vẫn hợp lệ). `docker compose up -d loki`.
+- **Bài học:** Không copy config blindly từ internet — phải check docs version chính xác. Loki changelog có section deprecated fields.
+- **Trạng thái:** Closed
+
+---
+
+### TROUBLE-004: Git Bash MSYS path conversion làm hỏng backup script
+
+- **Ngày:** 2026-07-14
+- **Service:** backup.sh (chạy qua Git Bash)
+- **Triệu chứng:** `tar: can't open 'C:/Program Files/Git/backup/...'` — backup 5/5 thất bại.
+- **Nguyên nhân gốc:** Git Bash (MSYS2) tự convert path Unix `/backup/` thành path Windows tuyệt đối `C:/Program Files/Git/backup/`. Container alpine nhận path sai, không tạo file được.
+- **Cách khắc phục:** Đặt `MSYS_NO_PATHCONV=1` trước lệnh `docker run` để tắt path conversion.
+- **Bài học:** Git Bash trên Windows convert path tự động — break script Docker. Khi script truyền path Linux vào container, luôn dùng `MSYS_NO_PATHCONV=1` hoặc double-slash `//backup`.
+- **Trạng thái:** Closed
+
+---
+
+### TROUBLE-005:

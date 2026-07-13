@@ -44,13 +44,132 @@ services:
       - TZ=${TZ:-Asia/Ho_Chi_Minh}
     # Không có `ports:` — NPM sẽ forward app1.local → homepage:3000
 
+  # ─────────────────────────────────────────────
+  # Prometheus — thu thập metrics (PULL model)
+  # Chủ động gọi đến exporter mỗi 15s, lưu vào time-series DB nội bộ
+  # Port 9090 expose ra host để debug trực tiếp (sẽ route qua NPM thành prometheus.local)
+  # ─────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.1
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"  # Tạm expose ra host để debug; sau sẽ chỉ qua NPM
+    volumes:
+      # Bind mount config: cần sửa prometheus.yml trực tiếp khi thêm job mới
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      # Named volume: time-series DB — dữ liệu metrics lịch sử, không sửa tay
+      - prometheus_data:/prometheus
+    networks:
+      - proxy        # Để NPM route prometheus.local → prometheus:9090
+      - monitoring   # Để scrape được node-exporter (cùng network monitoring)
+    environment:
+      - TZ=${TZ:-Asia/Ho_Chi_Minh}
+
+  # ─────────────────────────────────────────────
+  # Node Exporter — expose metrics hệ thống (CPU, RAM, disk, network)
+  # KHÔNG expose port ra host — chỉ Prometheus (cùng network) mới scrape được
+  # Mount /proc, /sys, / của host vào container (read-only) để đọc metrics hệ thống
+  # ─────────────────────────────────────────────
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      # Mount filesystem host vào container (read-only) để exporter đọc metrics thật
+      # /proc, /sys: thông tin kernel (CPU, memory, disk)
+      # /: root filesystem — để xem disk usage (đổi đường dẫn thành /host)
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      # Chỉ định lại đường dẫn mount (mặc định node-exporter đọc /proc, /sys trực tiếp)
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      # Bỏ collector không cần (giảm tải trên 8GB RAM)
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - monitoring   # Chỉ ở network monitoring — KHÔNG expose ra host, không cho NPM route
+    environment:
+      - TZ=${TZ:-Asia/Ho_Chi_Minh}
+
+  # ─────────────────────────────────────────────
+  # Grafana — visualization layer (dashboard CPU/RAM/disk)
+  # KHÔNG tự thu thập dữ liệu — query Prometheus qua datasource
+  # Port 3001 expose ra host để debug trực tiếp; route qua NPM thành grafana.local
+  # ─────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"  # Host 3001 → container 3000 (tránh clash với homepage nội bộ)
+    volumes:
+      # Named volume: dashboard, datasource config, user — dữ liệu quan trọng
+      - grafana_data:/var/lib/grafana
+    networks:
+      - proxy        # Để NPM route grafana.local → grafana:3000
+      - monitoring   # Để query Prometheus (datasource)
+    environment:
+      - TZ=${TZ:-Asia/Ho_Chi_Minh}
+      # Cài đặt bảo mật cơ bản: đổi password admin khi đăng nhập lần đầu
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      # Cho phép anonymous view (dashboard công khai trong homelab — không nhạy cảm)
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+
+  # ─────────────────────────────────────────────
+  # Loki — lưu log tập trung (nhẹ RAM, chỉ index label)
+  # Nhận log từ Promtail, query bằng LogQL trong Grafana
+  # Chọn Loki thay ELK vì 8GB RAM không đủ cho Elasticsearch (cần 4GB+ heap)
+  # ─────────────────────────────────────────────
+  loki:
+    image: grafana/loki:2.9.7
+    container_name: loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      # Bind mount config: cần sửa khi tune retention/limits
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml
+      # Named volume: log lịch sử — dữ liệu quan trọng, không sửa tay
+      - loki_data:/loki
+    networks:
+      - proxy        # Để NPM route loki.local → loki:3100 (query API)
+      - monitoring   # Để nhận push từ Promtail
+    environment:
+      - TZ=${TZ:-Asia/Ho_Chi_Minh}
+
+  # ─────────────────────────────────────────────
+  # Promtail — thu thập log container Docker, push lên Loki
+  # Push model (khác Prometheus pull): Promtail chủ động gửi log đến Loki
+  # Mount Docker socket để phát hiện container + đọc log
+  # ─────────────────────────────────────────────
+  promtail:
+    image: grafana/promtail:2.9.7
+    container_name: promtail
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml
+      # Docker socket: Promtail phát hiện container + đọc log path
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitoring   # Chỉ cần push đến Loki — không expose ra host, không route qua NPM
+    environment:
+      - TZ=${TZ:-Asia/Ho_Chi_Minh}
+
 # ─────────────────────────────────────────────
 # Network: container cùng network mới gọi nhau được (theo tên service)
-# NPM forward "app1.local" → "homepage:3000" vì cùng network "proxy"
+# - proxy: NPM route domain ảo đến service (homepage, prometheus, grafana, loki)
+# - monitoring: Prometheus scrape exporter + Grafana query Prometheus + Promtail push Loki
 # ─────────────────────────────────────────────
 networks:
   proxy:
     name: homelabops_proxy
+  monitoring:
+    name: homelabops_monitoring
 
 # ─────────────────────────────────────────────
 # Named volumes: dữ liệu tồn tại qua restart, không mất khi down
@@ -58,3 +177,6 @@ networks:
 volumes:
   npm_data:
   npm_letsencrypt:
+  prometheus_data:
+  grafana_data:
+  loki_data:

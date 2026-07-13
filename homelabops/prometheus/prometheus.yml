@@ -1,0 +1,29 @@
+# Prometheus — cấu hình scrape targets
+# Mục đích: chỉ định Prometheus sẽ PULL metrics từ đâu, bao lâu 1 lần
+# Prometheus là "pull model" — nó chủ động gọi đến exporter, không nhận push
+
+global:
+  # Scrape interval: tần suất pull metrics mặc định (15s là chuẩn cộng đồng)
+  # Vì sao 15s: cân bằng giữa độ chi tiết (nếu quá thưa thì bỏ sót spike CPU)
+  # và dung lượng lưu trữ (nếu quá dày thì DB phình to). 8GB RAM cần cẩn thận.
+  scrape_interval: 15s
+  # Evaluation interval: tần suất đánh giá alert rules (chưa dùng Tuần 2, để sau)
+  evaluation_interval: 15s
+
+# Danh sách job: mỗi job = 1 nhóm exporter cùng loại
+scrape_configs:
+  # Job 1: Prometheus tự scrape chính nó
+  # Vì sao: để monitor sức khỏe của bản thân Prometheus (memory, queue length)
+  - job_name: "prometheus"
+    static_configs:
+      - targets:
+          # "localhost:9090" ở đây là localhost BÊN TRONG container Prometheus
+          # (Prometheus expose /metrics của chính nó trên port 9090)
+          - "localhost:9090"
+
+  # Job 2: Node Exporter — metrics hệ thống (CPU, RAM, disk, network)
+  # Tên service "node-exporter" được Docker DNS resolve (cùng network monitoring)
+  - job_name: "node-exporter"
+    static_configs:
+      - targets:
+          - "node-exporter:9100"
