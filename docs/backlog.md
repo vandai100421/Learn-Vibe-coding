@@ -68,11 +68,11 @@
 
 ---
 
-## BL-006: (template trống)
+## BL-006: Ansible playbook deploy service
 
-- **Mô tả:**
-- **Lý do muốn có:**
-- **Lý do chưa làm:**
-- **Ưu tiên:**
-- **Khi nào làm:**
-- **Tham khảo:**
+- **Mô tả:** Viết Ansible playbook deploy 1-2 service (NPM + Homepage) tự động, thay vì `docker compose up` thủ công.
+- **Lý do muốn có:** Học Infrastructure as Code, idempotency, declarative config.
+- **Lý do chưa làm:** Tuần 2 đã kín (monitoring + logging + backup + SOP). Cài Ansible trên Windows cần WSL/Python setup thêm.
+- **Ưu tiên:** Medium
+- **Khi nào làm:** Sau khóa, khi có thời gian cài Ansible.
+- **Tham khảo:** `TASKS.md` Tuần 2, `docs/decisions.md`.
