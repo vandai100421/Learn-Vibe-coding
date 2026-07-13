@@ -1,0 +1,37 @@
+# OpsBrain — docker-compose.yml
+# Tuần 3: Open WebUI (chat UI + RAG engine built-in) + ChromaDB (vector DB built-in)
+# Mục đích: RAG pipeline offline — chat tiếng Việt với tài liệu P1
+# Ollama chạy native Windows (không Docker) — kết nối qua host.docker.internal
+
+services:
+  # ─────────────────────────────────────────────
+  # Open WebUI — frontend chat + RAG engine built-in
+  # Bao gồm: chat UI, upload tài liệu, chunk, embed, vector search, reranking
+  # Không cần code RAG pipeline từ đầu — tận dụng có sẵn (DEVELOPMENT_RULES)
+  # Port 8080: web UI (truy cập qua http://localhost:8080)
+  # ─────────────────────────────────────────────
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "8080:8080"  # Web UI
+    volumes:
+      # Bind mount: dữ liệu Open WebUI (vector DB ChromaDB built-in, tài liệu upload, user)
+      # Vì sao bind mount: cần backup/reste dễ — sao chép thư mục là xong
+      - ./open-webui/data:/app/backend/data
+    environment:
+      # Ollama URL — dùng host.docker.internal để container gọi Ollama native trên host
+      # Vì sao không dùng localhost: localhost trong container = container Open WebUI, không có Ollama
+      # host.docker.internal = host Windows (Ollama chạy ở đó, port 11434)
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      # Embedding model: bge-m3 (đã pull qua Ollama) — tốt tiếng Việt, đa ngôn ngữ
+      - OLLAMA_EMBEDDINGS_MODEL=bge-m3
+      # LLM mặc định cho chat
+      - OLLAMA_DEFAULT_MODEL=qwen2.5:3b
+      # Cho phép đăng ký user mới (homelab nội bộ)
+      - WEBUI_AUTH=true
+      - TZ=${TZ:-Asia/Ho_Chi_Minh}
+    extra_hosts:
+      # host.docker.internal cần được resolve trong container (Linux container trên Windows host)
+      - "host.docker.internal:host-gateway"
