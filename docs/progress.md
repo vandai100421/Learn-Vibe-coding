@@ -84,6 +84,35 @@
   - Promtail ban đầu không resolve `loki` (Loki chưa start xong) → tự retry, thành công.
 - **Kế hoạch phiên sau:** Viết Ansible playbook deploy service, viết 2-3 SOP (restart, restore, thêm service).
 
+### 2026-07-14 — Viết 3 SOP vận hành
+
+- **Thời gian:** 01:15-01:30 (15 phút)
+- **Mục tiêu phiên:** Viết 3 SOP: restart stack, restore backup, thêm service mới.
+- **Đã làm:**
+  - `SOP-001-restart-stack.md`: quy trình khởi động lại stack sau restart máy, verify bằng curl + docker ps.
+  - `SOP-002-restore-backup.md`: quy trình restore volume từ tar.gz, có cảnh báo dừng service trước, dùng `MSYS_NO_PATHCONV=1`.
+  - `SOP-003-add-new-service.md`: quy trình thêm service mới (compose + hosts + NPM + Homepage + backup), ví dụ Uptime Kuma.
+- **Chưa làm:** Ansible playbook (dời sang sau nếu hết thời gian).
+- **Khó khăn:** không.
+- **Kế hoạch phiên sau:** Tổng kết Tuần 2, sang Tuần 3 (P2: Ollama + RAG pipeline).
+
+---
+
+## Tổng kết Tuần 2
+
+- **Mục tiêu TASKS.md đạt được:**
+  - ✅ Thêm Prometheus + Node Exporter vào compose.
+  - ✅ Thêm Grafana, import dashboard CPU/RAM/disk (Node Exporter Full, ID 1860).
+  - ✅ Thêm Loki + Promtail, query log container được trong Grafana.
+  - ✅ Viết script `backup.sh` backup volume + DB.
+  - ✅ Cấu hình cron chạy backup định kỳ (Windows Task Scheduler daily 2AM).
+  - ✅ Viết 2-3 SOP: restart stack, restore backup, thêm service mới.
+  - ✅ Ghi log học tập: 4 concept đã hiểu.
+- **Mục tiêu chưa đạt:** Ansible playbook (dời sang sau). Uptime Kuma (tùy chọn, dời).
+- **Concept đã học:** `docs/learning-log.md` — Prometheus pull model + exporter, Metrics vs Logs, Loki vs ELK, Bash `set -euo pipefail` + backup volume.
+- **Vấn đề mở:** không có ISSUE mới. TROUBLE-003 (Loki config), TROUBLE-004 (MSYS path) đã closed.
+- **Tự đánh giá:** đúng tiến độ. Monitoring + logging + backup + SOP hoàn thành.
+
 ---
 
 ## Tuần 3 — P2: Pipeline RAG offline
